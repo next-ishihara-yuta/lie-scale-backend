@@ -1,28 +1,31 @@
-
 services:
-  app:
-    container_name: laravel  
-    build: ./docker/php
-    volumes:
-      - .:/app
-  nginx:
-    image: nginx 
-    container_name: nginx
-    ports:
-      - 8080:80 
-    volumes:
-      - .:/app
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    working_dir: /app
-    depends_on:
-      - app
+    app:
+        image: bref/php-82-fpm-dev:2
+        ports: [ '8000:8000' ]
+        volumes:
+            - .:/var/task
+            - ./storage:/var/task/storage
+        environment:
+            HANDLER: public/index.php
+            # Assets will be served from this directory
+            DOCUMENT_ROOT: public
+    # web:
+    #   image: bref/fpm-dev-gateway
+    #   ports:
+    #       - '8000:80'
+    #   volumes:
+    #       - .:/var/task:ro # Read only, like a lambda function
+    #   depends_on:
+    #       - php
+    #   environment:
+    #       HANDLER: demo/http.php
 
-  dynamodb-local:
-    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
-    image: "amazon/dynamodb-local:latest"
-    container_name: dynamodb-local
-    ports:
-      - "8000:8000"
-    volumes:
-      - "./docker/dynamodb:/home/dynamodblocal/data"
-    working_dir: /home/dynamodblocal
+    dynamodb-local:
+      command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+      image: "amazon/dynamodb-local:latest"
+      container_name: dynamodb-local
+      ports:
+        - "8080:8080"
+      volumes:
+        - "./docker/dynamodb:/home/dynamodblocal/data"
+      working_dir: /home/dynamodblocal
